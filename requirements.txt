@@ -1,0 +1,14 @@
+flask
+werkzeug
+SQLAlchemy
+alembic
+Flask-Migrate
+Flask-Script
+Flask-SqlAlchemy
+Flask-Admin
+Flask-Login
+psycopg2-binary
+oauth2client
+python-dotenv
+flask-socketio
+eventlet
