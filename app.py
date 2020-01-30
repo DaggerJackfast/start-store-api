@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
+from flask_cors import CORS
 from config import config
 
 migrate = Migrate()
@@ -13,6 +14,7 @@ admin = Admin(name='start-store', template_mode="bootstrap3")
 
 
 app = Flask(__name__)
+CORS(app)
 
 app.config.from_object(config[os.environ.get('ENV', 'DEVELOPMENT')])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
