@@ -3,6 +3,7 @@ import os
 import json
 import logging
 from flask import Flask, render_template, request, jsonify
+from flask_socketio import SocketIO, send, emit
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
@@ -23,6 +24,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # migrate.init_app(app, db)
 admin.init_app(app)
 
+socketio = SocketIO(
+    app,
+    cors_allowed_origins=os.environ.get('CORS_ALLOWED_ORIGINS', '*'),
+    logger=True,
+    engineio_logger=True
+)
+
 products = []
 with open(os.path.join(basedir, 'fixtures/products.json')) as p:
     products = [dict(x, **{'id': i}) for i, x in enumerate(json.loads(p.read()))]
@@ -32,6 +40,7 @@ with open(os.path.join(basedir, './fixtures/shipping.json')) as p:
     shipping = [dict(x, **{'id': i}) for i, x in enumerate(json.loads(p.read()))]
 
 orders = []
+messages = []
 
 
 @app.route('/')
@@ -68,5 +77,16 @@ def get_orders():
     return jsonify(orders)
 
 
+@socketio.on('connect')
+def handle_connect():
+    emit("messages", messages)
+
+
+@socketio.on("message")
+def handle_message(message: str):
+    messages.append(message)
+    emit('message', message, broadcast=True)
+
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
