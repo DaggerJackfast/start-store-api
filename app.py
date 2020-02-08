@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_cors import CORS
 from config import config, basedir
+from serializers import ProductSerializer, ShippingSerializer
 
 migrate = Migrate()
 admin = Admin(name='start-store', template_mode="bootstrap3")
@@ -19,17 +20,19 @@ CORS(app)
 
 app.config.from_object(config[os.environ.get('ENV', 'DEVELOPMENT')])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# db = SQLAlchemy(app)
-# db.init_app(app)
-# migrate.init_app(app, db)
+db = SQLAlchemy(app)
+db.init_app(app)
+migrate.init_app(app, db)
 admin.init_app(app)
-
 socketio = SocketIO(
     app,
     cors_allowed_origins=os.environ.get('CORS_ALLOWED_ORIGINS', '*'),
     logger=True,
     engineio_logger=True
 )
+
+from models import *  # noqa: E401, F403, F401
+
 
 products = []
 with open(os.path.join(basedir, 'fixtures/products.json')) as p:
@@ -50,17 +53,20 @@ def index():
 
 @app.route('/products')
 def get_products():
-    return jsonify(products)
+    products = db.session.query(Product).all()
+    return json.dumps(products, cls=ProductSerializer)
 
 
 @app.route('/products/<product_id>')
 def get_product(product_id):
-    return jsonify(products[int(product_id)])
+    product = db.session.query(Product).get(product_id)
+    return json.dumps(product, cls=ProductSerializer)
 
 
 @app.route('/shipping')
 def get_shipping():
-    return jsonify(shipping)
+    shipping = db.session.query(Shipping).all()
+    return json.dumps(shipping, cls=ShippingSerializer)
 
 
 @app.route('/order/checkout', methods=['POST'])
