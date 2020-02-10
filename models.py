@@ -15,7 +15,7 @@ class Product(Updatable):
     enabled = db.Column(db.Boolean())
 
 
-class Shipping(db.Model): 
+class Shipping(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False, unique=True)
     price = db.Column(db.Numeric(precision=8, asdecimal=False, decimal_return_scale=None))
