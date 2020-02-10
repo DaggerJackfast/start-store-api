@@ -3,6 +3,7 @@ import os
 import json
 import logging
 from flask import Flask, Blueprint, render_template, request, jsonify
+from flask_security import SQLAlchemyUserDatastore, Security
 from flask_socketio import SocketIO, send, emit
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -88,6 +89,9 @@ def handle_message(message: str):
 
 app.register_blueprint(root)
 app.register_blueprint(products)
+
+user_data_store = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_data_store)
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=5000, debug=True)
