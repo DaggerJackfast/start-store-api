@@ -1,14 +1,8 @@
-import os
 import json
 from flask import Blueprint
 from models import Product
 from serializers import ProductSerializer
-from config import basedir
 
-
-products_list = []
-with open(os.path.join(basedir, 'fixtures/products.json')) as p:
-    products_list = [dict(x, **{'id': i}) for i, x in enumerate(json.loads(p.read()))]
 
 products = Blueprint('products', __name__, url_prefix='/products')
 
